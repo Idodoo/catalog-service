@@ -1,0 +1,1 @@
+ALTER SEQUENCE product_id_seq INCREMENT BY 50;
