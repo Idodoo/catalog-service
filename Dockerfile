@@ -1,5 +1,3 @@
-#LABEL maintainer="Ivan Dodoo <dodoo.ivan17@gmail.com>"
-
 FROM maven:3.9.5-eclipse-temurin-21 AS build
 WORKDIR /workspace/app
 
