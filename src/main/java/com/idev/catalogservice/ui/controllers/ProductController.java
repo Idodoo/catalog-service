@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("${spring.data.rest.base-path}")
+@RequestMapping("${api.base-path}")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
@@ -29,6 +29,7 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> ProductNotFoundException.forCode(code));
     }
+
     @DeleteMapping("/{code}")
     @Operation(summary = "Delete product by code",
             description = "Deletes the product with the specified code.", tags = {"Products"})
@@ -41,12 +42,8 @@ public class ProductController {
     @Operation(summary = "Update product",
             description = "Updates the details of an existing product.", tags = {"Products"})
     ResponseEntity<Product> updateProduct(@Valid @RequestBody ProductDTO product) {
-        return productService.getProductByCode(product.getCode())
-                .map(existingProduct -> {
-                    Product updatedProduct = productService.updateProduct(product);
-                    return ResponseEntity.ok(updatedProduct);
-                })
-                .orElseThrow(() -> ProductNotFoundException.forCode(product.getCode()));
+        Product updatedProduct = productService.updateProduct(product);
+        return ResponseEntity.ok(updatedProduct);
     }
 
     @PostMapping

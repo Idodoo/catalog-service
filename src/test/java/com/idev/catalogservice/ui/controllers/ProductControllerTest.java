@@ -1,10 +1,8 @@
 package com.idev.catalogservice.ui.controllers;
 
 
-import com.idev.catalogservice.ApplicationProperties;
 import com.idev.catalogservice.domain.*;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
@@ -19,7 +17,7 @@ public class ProductControllerTest {
     void getProductByCode_returnsProduct_whenFoud() {
         ProductService productService = mock(ProductService.class);
         ProductController productController = new ProductController(productService);
-        Product product =  new Product("P002", "Test Product", "This is a test product", "http://example.com/image.jpg", BigDecimal.valueOf(19.9));
+        Product product = new Product("P002", "Test Product", "This is a test product", "http://api.com/image.jpg", BigDecimal.valueOf(19.9));
 
         when(productService.getProductByCode("P002")).thenReturn(Optional.of(product));
 
@@ -30,24 +28,69 @@ public class ProductControllerTest {
     }
 
     @Test
-    void createProduct_givenFindByCode_returnOfProductEntity(){
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setCode("P001");
-        productEntity.setId(1L);
-        productEntity.setName("Test Product");
-        productEntity.setDescription("This is a test product");
-        productEntity.setImageUrl("http://example.com/image.jpg");
-        productEntity.setPrice(BigDecimal.valueOf(15.9));
-        Optional<ProductEntity> ofResult = Optional.of(productEntity);
-        ProductRepository productRepository = mock(ProductRepository.class);
-        when(productRepository.findByCode(Mockito.<String>any())).thenReturn(ofResult);
-        ProductController productController = new ProductController(new ProductService(productRepository, new ApplicationProperties(10)));
+    void getProductByCode_throwsException_whenNotFound() {
+        ProductService productService = mock(ProductService.class);
+        ProductController productController = new ProductController(productService);
 
-        assertThrows(ProductAlreadyExistsException.class,() ->
-            productController.createProduct(new ProductDTO("P001", "Test Product", "This is a test product", "http://example.com/image.jpg", BigDecimal.valueOf(15.9))));
+        when(productService.getProductByCode("P003")).thenReturn(Optional.empty());
 
-        verify(productRepository).findByCode(eq("P001"));
+        assertThrows(ProductNotFoundException.class, () -> productController.getProductByCode("P003"));
+    }
 
+    @Test
+    void createProduct_createsProduct_whenValid() {
+        ProductService productService = mock(ProductService.class);
+        ProductController productController = new ProductController(productService);
+        ProductDTO productDTO = new ProductDTO("P004", "New Prod", "This is a new product", "http://api.com/image.jpg", BigDecimal.valueOf(25.0));
+        Product createdProduct = new Product("P004", "New Prod", "This is a new product", "http://api.com/image.jpg", BigDecimal.valueOf(25.0));
+
+        when(productService.getProductByCode("P004")).thenReturn(Optional.empty());
+        when(productService.createProduct(productDTO)).thenReturn(createdProduct);
+
+        ResponseEntity<Product> response = productController.createProduct(productDTO);
+
+        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(createdProduct, response.getBody());
+    }
+
+    @Test
+    void createProduct_throwsException_whenProductAlreadyExists() {
+        ProductService productService = mock(ProductService.class);
+        ProductController productController = new ProductController(productService);
+        ProductDTO productDTO = new ProductDTO("P001", "Ex Product", "This is an existing product", "http://api.com/image.jpg", BigDecimal.valueOf(15.9));
+        Product existingProduct = new Product("P001", "Ex Product", "This is an existing product", "http://api.com/image.jpg", BigDecimal.valueOf(15.9));
+
+        when(productService.getProductByCode("P001")).thenReturn(Optional.of(existingProduct));
+
+        assertThrows(ProductAlreadyExistsException.class, () -> productController.createProduct(productDTO));
+    }
+
+    @Test
+    void updateProduct_updatesProduct_whenValid() {
+        ProductService productService = mock(ProductService.class);
+        ProductController productController = new ProductController(productService);
+        ProductDTO productDTO = new ProductDTO("P005", "UP", "EXCC PR", "http://api.com/image.jpg", BigDecimal.valueOf(30.0));
+        Product existingProduct = new Product("P005", "OP", "old ERS", "http://api.com/image.jpg", BigDecimal.valueOf(20.0));
+        Product updatedProduct = new Product("P005", "UP", "UPPROD", "http://api.com/image.jpg", BigDecimal.valueOf(30.0));
+
+        when(productService.getProductByCode("P005")).thenReturn(Optional.of(existingProduct));
+        when(productService.updateProduct(productDTO)).thenReturn(updatedProduct);
+
+        ResponseEntity<Product> response = productController.updateProduct(productDTO);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(updatedProduct, response.getBody());
+    }
+
+    @Test
+    void updateProduct_throwsException_whenNotFound() {
+        ProductService productService = mock(ProductService.class);
+        ProductController productController = new ProductController(productService);
+        ProductDTO productDTO = new ProductDTO("P006", "NonExProd", "Doesn't ext", "http://api.com/image.jpg", BigDecimal.valueOf(40.0));
+
+        when(productService.getProductByCode("P006")).thenReturn(Optional.empty());
+
+        assertThrows(ProductNotFoundException.class, () -> productController.updateProduct(productDTO));
     }
 
     @Test
@@ -61,5 +104,15 @@ public class ProductControllerTest {
 
         assertEquals(204, response.getStatusCodeValue());
         verify(productService, times(1)).deleteProductByCode("P002");
+    }
+
+    @Test
+    void deleteProductByCode_throwsException_whenNotFound() {
+        ProductService productService = mock(ProductService.class);
+        ProductController productController = new ProductController(productService);
+
+        doThrow(ProductNotFoundException.forCode("P007")).when(productService).deleteProductByCode("P007");
+
+        assertThrows(ProductNotFoundException.class, () -> productController.deleteProductByCode("P007"));
     }
 }
