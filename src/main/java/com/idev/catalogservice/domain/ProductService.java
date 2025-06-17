@@ -1,7 +1,8 @@
 package com.idev.catalogservice.domain;
 
 import com.idev.catalogservice.ApplicationProperties;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ApplicationProperties properties;
 
+
+    @Transactional(readOnly = true)
     public PagedResult<Product> getProducts(int pageNo) {
         Sort sort = Sort.by("name").ascending();
         pageNo = pageNo <= 1 ? 0 : pageNo - 1;
@@ -35,7 +38,10 @@ public class ProductService {
                 productsPage.hasPrevious());
     }
 
+
+    @Transactional(readOnly = true)
     public Optional<Product> getProductByCode(String code) {
+
         return productRepository.findByCode(code).map(ProductMapper::toProduct);
     }
 
