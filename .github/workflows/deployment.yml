@@ -45,35 +45,32 @@ jobs:
           restore-keys: |
                 maven-${{ runner.os }}-
 
-#      - name: Install Maven dependencies
-#        run:  mvn install
+      - name: Run tests
+        run: mvn -B test
 
-#      - name: Run tests
-#        run: mvn -B test
+      - name: Package application
+        run: mvn -B package -DskipTests
+
+#      - name: Build Docker image
+#        run: docker build -t ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
 #
-#      - name: Package application
-#        run: mvn -B package -DskipTests
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v3
+#        with:
+#          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+#          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+#          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Build Docker image
-        run: docker build -t ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-
-      - name: Log in to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Push Docker image to ECR
-        if: github.ref == 'refs/heads/CI/CD'
-        run: |
-          
-          ECR_REGISTRY=$(aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} --query 'repositories[0].repositoryUri' --output text | sed 's/\/.*$//')
-          
-          docker tag ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+#
+#      - name: Log in to Amazon ECR
+#        id: login-ecr
+#        uses: aws-actions/amazon-ecr-login@v2
+#
+#      - name: Push Docker image to ECR
+#        if: github.ref == 'refs/heads/CI/CD'
+#        run: |
+#
+#          ECR_REGISTRY=$(aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} --query 'repositories[0].repositoryUri' --output text | sed 's/\/.*$//')
+#
+#          docker tag ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+#          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
