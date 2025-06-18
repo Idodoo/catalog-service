@@ -59,9 +59,10 @@ jobs:
 
 #      - name: Log in to Amazon ECR
 #      - uses: aws-actions/amazon-ecr-login@v2
-#        with:
-#          region: ${{ env.AWS_REGION }}
-#          registry: ${{ env.ECR_REPOSITORY }}
+
+
+
+      #          registry: ${{ env.ECR_REPOSITORY }}
       #        with:
       #          region: ${{ env.AWS_REGION }}
       #          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
