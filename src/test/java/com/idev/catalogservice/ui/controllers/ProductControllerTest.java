@@ -87,7 +87,9 @@ public class ProductControllerTest {
         ProductService productService = mock(ProductService.class);
         ProductController productController = new ProductController(productService);
         ProductDTO productDTO = new ProductDTO("P006", "NonExProd", "Doesn't ext", "http://api.com/image.jpg", BigDecimal.valueOf(40.0));
-        when(productService.updateProduct(productDTO)).thenThrow(new ProductNotFoundException("Product not found with code: " + productDTO.getCode()));
+
+        when(productService.updateProduct(any(ProductDTO.class)))
+                .thenThrow(new ProductNotFoundException("Product not found with code: P006"));
 
         assertThrows(ProductNotFoundException.class, () -> productController.updateProduct(productDTO));
     }
