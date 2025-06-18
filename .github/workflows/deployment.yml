@@ -1,13 +1,16 @@
 name: Build and Deploy to AWS ECR
+
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ CI/CD ]
+    branches:
+      - CI/CD
     paths:
       - '*/src/*'
       - '.github/workflows/**.yaml'
   push:
-    branches: [ CI/CD ]
+    branches:
+        - CI/CD
     paths:
       - '*/src/*'
       - '.github/workflows/**.yaml'
