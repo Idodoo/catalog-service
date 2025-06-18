@@ -40,13 +40,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.m2/repository
+            ~/.m2
           key: maven-${{runner.os }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
                 maven-${{ runner.os }}-
 
-      - name: Install Maven dependencies
-        run:  mvn install
+#      - name: Install Maven dependencies
+#        run:  mvn install
 
       - name: Run tests
         run: mvn -B test
