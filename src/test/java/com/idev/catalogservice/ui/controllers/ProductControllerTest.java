@@ -88,7 +88,8 @@ public class ProductControllerTest {
         ProductController productController = new ProductController(productService);
         ProductDTO productDTO = new ProductDTO("P006", "NonExProd", "Doesn't ext", "http://api.com/image.jpg", BigDecimal.valueOf(40.0));
 
-        when(productService.getProductByCode("P006")).thenReturn(Optional.empty());
+        when(productService.updateProduct(any(ProductDTO.class)))
+                .thenThrow(new ProductNotFoundException("Product not found with code: P006"));
 
         assertThrows(ProductNotFoundException.class, () -> productController.updateProduct(productDTO));
     }
