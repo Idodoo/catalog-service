@@ -1,0 +1,71 @@
+name: Build and Deploy to AWS ECR
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ CI/CD ]
+    paths:
+      - '*/src/*'
+      - '.github/workflows/**.yaml'
+  push:
+    branches: [ CI/CD ]
+    paths:
+      - '*/src/*'
+      - '.github/workflows/**.yaml'
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  IMAGE_TAG: v1.0.2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+          key: maven-${{runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+                maven-${{ runner.os }}-
+
+      - name: Install Maven dependencies
+        run:  mvn install
+
+      - name: Run tests
+        run: mvn -B test
+
+      - name: Package application
+        run: mvn -B package -DskipTests
+
+      - name: Build Docker image
+        run: docker build -t ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
+
+#      - name: Log in to Amazon ECR
+#      - uses: aws-actions/amazon-ecr-login@v2
+#        with:
+#          region: ${{ env.AWS_REGION }}
+#          registry: ${{ env.ECR_REPOSITORY }}
+      #        with:
+      #          region: ${{ env.AWS_REGION }}
+      #          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+
+#      - name: Push Docker image to ECR
+#        run: |
+#          docker tag ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} ${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+#          docker push ${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
