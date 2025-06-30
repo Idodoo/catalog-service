@@ -3,4 +3,4 @@
 *.log
 *.iml
 target/
-.env
+.env/
