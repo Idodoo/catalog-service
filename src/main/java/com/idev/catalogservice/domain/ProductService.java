@@ -40,9 +40,10 @@ public class ProductService {
 
 
     @Transactional(readOnly = true)
-    public Optional<Product> getProductByCode(String code) {
-
-        return productRepository.findByCode(code).map(ProductMapper::toProduct);
+    public Product getProductByCode(String code) {
+        return productRepository.findByCode(code)
+                .map(ProductMapper::toProduct)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with code: " + code));
     }
 
 

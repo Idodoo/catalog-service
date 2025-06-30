@@ -19,7 +19,7 @@ public class ProductControllerTest {
         ProductController productController = new ProductController(productService);
         Product product = new Product("P002", "Test Product", "This is a test product", "http://api.com/image.jpg", BigDecimal.valueOf(19.9));
 
-        when(productService.getProductByCode("P002")).thenReturn(Optional.of(product));
+        when(productService.getProductByCode("P002")).thenReturn(product);
 
         ResponseEntity<Product> response = productController.getProductByCode("P002");
 
@@ -32,7 +32,8 @@ public class ProductControllerTest {
         ProductService productService = mock(ProductService.class);
         ProductController productController = new ProductController(productService);
 
-        when(productService.getProductByCode("P003")).thenReturn(Optional.empty());
+        when(productService.getProductByCode("P003"))
+                .thenThrow(new ProductNotFoundException("Product not found with code: P003"));
 
         assertThrows(ProductNotFoundException.class, () -> productController.getProductByCode("P003"));
     }
@@ -44,7 +45,7 @@ public class ProductControllerTest {
         ProductDTO productDTO = new ProductDTO("P004", "New Prod", "This is a new product", "http://api.com/image.jpg", BigDecimal.valueOf(25.0));
         Product createdProduct = new Product("P004", "New Prod", "This is a new product", "http://api.com/image.jpg", BigDecimal.valueOf(25.0));
 
-        when(productService.getProductByCode("P004")).thenReturn(Optional.empty());
+
         when(productService.createProduct(productDTO)).thenReturn(createdProduct);
 
         ResponseEntity<Product> response = productController.createProduct(productDTO);
@@ -58,9 +59,10 @@ public class ProductControllerTest {
         ProductService productService = mock(ProductService.class);
         ProductController productController = new ProductController(productService);
         ProductDTO productDTO = new ProductDTO("P001", "Ex Product", "This is an existing product", "http://api.com/image.jpg", BigDecimal.valueOf(15.9));
-        Product existingProduct = new Product("P001", "Ex Product", "This is an existing product", "http://api.com/image.jpg", BigDecimal.valueOf(15.9));
 
-        when(productService.getProductByCode("P001")).thenReturn(Optional.of(existingProduct));
+
+        when(productService.createProduct(productDTO))
+                .thenThrow(new ProductAlreadyExistsException("Product already exists with code: P001"));
 
         assertThrows(ProductAlreadyExistsException.class, () -> productController.createProduct(productDTO));
     }
@@ -73,7 +75,7 @@ public class ProductControllerTest {
         Product existingProduct = new Product("P005", "OP", "old ERS", "http://api.com/image.jpg", BigDecimal.valueOf(20.0));
         Product updatedProduct = new Product("P005", "UP", "UPPROD", "http://api.com/image.jpg", BigDecimal.valueOf(30.0));
 
-        when(productService.getProductByCode("P005")).thenReturn(Optional.of(existingProduct));
+
         when(productService.updateProduct(productDTO)).thenReturn(updatedProduct);
 
         ResponseEntity<Product> response = productController.updateProduct(productDTO);

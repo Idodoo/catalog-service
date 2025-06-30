@@ -24,10 +24,8 @@ public class ProductController {
     @Operation(summary = "Get product by code",
             description = "Returns product details for the specified product code.", tags = {"Products"})
     ResponseEntity<Product> getProductByCode(@PathVariable String code) {
-        return productService
-                .getProductByCode(code)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> ProductNotFoundException.forCode(code));
+        Product product = productService.getProductByCode(code);
+        return ResponseEntity.ok(product);
     }
 
     @DeleteMapping("/{code}")
@@ -50,9 +48,6 @@ public class ProductController {
     @Operation(summary = "Create new product",
             description = "Creates a new product with the provided details.", tags = {"Products"})
     ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDTO product) {
-        if (productService.getProductByCode(product.getCode()).isPresent()) {
-            throw new ProductAlreadyExistsException("Product already exists with code: " + product.getCode());
-        }
         Product createdProduct = productService.createProduct(product);
         return ResponseEntity.status(201).body(createdProduct);
     }
