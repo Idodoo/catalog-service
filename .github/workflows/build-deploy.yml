@@ -32,22 +32,6 @@ jobs:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_NAME }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Check EC2 instance status
-        run: |
-          INSTANCE_STATE=$(aws ec2 describe-instances --instance-ids ${{ env.EC2_INSTANCE_ID }} --query "Reservations[0].Instances[0].State.Name" --output text || echo "ERROR")
-          echo "Instance state: $INSTANCE_STATE"
-          if [ "$INSTANCE_STATE" != "running" ]; then
-            echo "Error: Instance ${{ env.EC2_INSTANCE_ID }} is not running"
-            exit 1
-          fi
-          
-          echo "Checking SSM agent status..."
-          SSM_STATUS=$(aws ssm describe-instance-information --filters "Key=InstanceIds,Values=${{ env.EC2_INSTANCE_ID }}" --query "InstanceInformationList[0].PingStatus" --output text || echo "NOT_FOUND")
-          echo "SSM status: $SSM_STATUS"
-          if [ "$SSM_STATUS" != "Online" ]; then
-            echo "Error: SSM agent is not online for instance ${{ env.EC2_INSTANCE_ID }}"
-            exit 1
-          fi
 
       - name: Deploy to EC2
         id: deploy
