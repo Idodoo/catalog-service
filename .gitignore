@@ -32,4 +32,17 @@ build/
 ### VS Code ###
 .vscode/
 
+### Terraform ###
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfstate.*
+crash.log
+*.tfvars
+.terraform.lock.hcl
+
+### Kubernetes ###
+.kube/
+
+
 .env

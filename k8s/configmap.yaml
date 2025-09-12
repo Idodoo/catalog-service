@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: catalog-service-config
+  namespace: default
+data:
+  application.properties: |
+    spring.profiles.active=staging
+    server.port=8085
+    management.endpoints.web.exposure.include=health,info,metrics,prometheus
+    management.endpoint.health.show-details=always
+    management.metrics.export.prometheus.enabled=true
+    logging.level.com.idev.catalogservice=ERROR
+    logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} - %msg%n
