@@ -40,6 +40,12 @@ build/
 crash.log
 *.tfvars
 .terraform.lock.hcl
+terraform.tfvars
+
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 
 ### Kubernetes ###
 .kube/

@@ -30,3 +30,8 @@ output "update_kubeconfig_command" {
   description = "Command to update kube config"
   value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${var.cluster_name}"
 }
+
+output "aws_auth_configmap_yaml" {
+  description = "Formatted yaml output for base aws-auth configmap containing roles used in cluster node groups"
+  value       = module.eks.aws_auth_configmap_yaml
+}
